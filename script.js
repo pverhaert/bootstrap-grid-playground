@@ -15,8 +15,9 @@ const state = {
 };
 
 // Default column template
-const createDefaultColumn = () => ({
+const createDefaultColumn = (colorIndex) => ({
     id: generateId(),
+    colorIndex: colorIndex !== undefined ? colorIndex : Math.floor(Math.random() * 8),
     height: '',           // Custom height (e.g., '50px', '100px', '150px', '200px')
     widths: {
         xs: 'col',      // Default auto
@@ -51,7 +52,7 @@ const createDefaultRow = () => ({
     gutterY: '',        // gy-0 to gy-5
     alignItems: '',     // align-items-start, center, end
     justifyContent: '', // justify-content-start, center, end, between, around, evenly
-    columns: [createDefaultColumn(), createDefaultColumn()]
+    columns: [createDefaultColumn(0), createDefaultColumn(1)]
 });
 
 // Generate unique ID
@@ -304,6 +305,13 @@ function createColumnElement(col, rowIndex, colIndex) {
     colEl.className = colClasses.join(' ');
     colEl.dataset.rowIndex = rowIndex;
     colEl.dataset.colIndex = colIndex;
+    colEl.dataset.colorIndex = col.colorIndex !== undefined ? col.colorIndex : (colIndex % 8);
+
+    // Add color class based on colorIndex
+    colEl.classList.add(`col-color-${col.colorIndex !== undefined ? col.colorIndex : (colIndex % 8)}`);
+
+    // Make column draggable
+    colEl.draggable = true;
 
     // Column inner content
     const inner = document.createElement('div');
@@ -335,6 +343,13 @@ function createColumnElement(col, rowIndex, colIndex) {
         e.stopPropagation();
         deleteColumn(rowIndex, colIndex);
     });
+
+    // Drag and drop event listeners
+    colEl.addEventListener('dragstart', handleDragStart);
+    colEl.addEventListener('dragend', handleDragEnd);
+    colEl.addEventListener('dragover', handleDragOver);
+    colEl.addEventListener('dragleave', handleDragLeave);
+    colEl.addEventListener('drop', handleDrop);
 
     return colEl;
 }
@@ -372,7 +387,9 @@ function addColumn(rowIndex) {
         return;
     }
 
-    row.columns.push(createDefaultColumn());
+    // Assign next color index (cycle through 0-7)
+    const nextColorIndex = totalCols % 8;
+    row.columns.push(createDefaultColumn(nextColorIndex));
     renderGrid();
 }
 
@@ -846,6 +863,94 @@ function toggleContainer(isFluid) {
     document.getElementById('containerLabel').textContent = isFluid ? '.container-fluid' : '.container';
     updateGhostGridContainer();
     renderGrid();
+}
+
+// ============================================
+// DRAG AND DROP HANDLERS
+// ============================================
+
+let draggedElement = null;
+
+function handleDragStart(e) {
+    draggedElement = {
+        rowIndex: parseInt(e.currentTarget.dataset.rowIndex),
+        colIndex: parseInt(e.currentTarget.dataset.colIndex)
+    };
+
+    e.currentTarget.classList.add('dragging');
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/html', e.currentTarget.innerHTML);
+}
+
+function handleDragEnd(e) {
+    e.currentTarget.classList.remove('dragging');
+
+    // Remove all drag-over classes
+    document.querySelectorAll('.playground-col').forEach(col => {
+        col.classList.remove('drag-over');
+    });
+
+    draggedElement = null;
+}
+
+function handleDragOver(e) {
+    if (e.preventDefault) {
+        e.preventDefault();
+    }
+
+    e.dataTransfer.dropEffect = 'move';
+
+    const targetCol = e.currentTarget;
+    if (targetCol.classList.contains('playground-col') && !targetCol.classList.contains('dragging')) {
+        targetCol.classList.add('drag-over');
+    }
+
+    return false;
+}
+
+function handleDragLeave(e) {
+    e.currentTarget.classList.remove('drag-over');
+}
+
+function handleDrop(e) {
+    if (e.stopPropagation) {
+        e.stopPropagation();
+    }
+
+    e.preventDefault();
+
+    const targetRowIndex = parseInt(e.currentTarget.dataset.rowIndex);
+    const targetColIndex = parseInt(e.currentTarget.dataset.colIndex);
+
+    // Don't drop on itself
+    if (draggedElement &&
+        (draggedElement.rowIndex !== targetRowIndex || draggedElement.colIndex !== targetColIndex)) {
+
+        // Only allow reordering within the same row
+        if (draggedElement.rowIndex === targetRowIndex) {
+            const row = state.rows[targetRowIndex];
+            const draggedCol = row.columns[draggedElement.colIndex];
+
+            // Remove from old position
+            row.columns.splice(draggedElement.colIndex, 1);
+
+            // Insert at new position
+            const newIndex = draggedElement.colIndex < targetColIndex ? targetColIndex - 1 : targetColIndex;
+            row.columns.splice(newIndex, 0, draggedCol);
+
+            // Update active element if needed
+            if (state.activeElement?.type === 'col' && state.activeElement?.rowIndex === targetRowIndex) {
+                if (state.activeElement.colIndex === draggedElement.colIndex) {
+                    state.activeElement.colIndex = newIndex;
+                }
+            }
+
+            renderGrid();
+        }
+    }
+
+    e.currentTarget.classList.remove('drag-over');
+    return false;
 }
 
 // ============================================
