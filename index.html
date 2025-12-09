@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bootstrap 5.3 Grid Mastery Playground</title>
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMiIgaGVpZ2h0PSIzMiIgdmlld0JveD0iMCAwIDMyIDMyIj48cmVjdCB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHJ4PSI0IiBmaWxsPSIjMGQ2ZWZkIi8+PHJlY3QgeD0iNCIgeT0iNCIgd2lkdGg9IjYiIGhlaWdodD0iMjQiIHJ4PSIxIiBmaWxsPSIjZmZmIiBvcGFjaXR5PSIuOSIvPjxyZWN0IHg9IjEzIiB5PSI0IiB3aWR0aD0iNiIgaGVpZ2h0PSIxMCIgcng9IjEiIGZpbGw9IiNmZmYiIG9wYWNpdHk9Ii45Ii8+PHJlY3QgeD0iMTMiIHk9IjE4IiB3aWR0aD0iNiIgaGVpZ2h0PSIxMCIgcng9IjEiIGZpbGw9IiNmZmYiIG9wYWNpdHk9Ii45Ii8+PHJlY3QgeD0iMjIiIHk9IjQiIHdpZHRoPSI2IiBoZWlnaHQ9IjI0IiByeD0iMSIgZmlsbD0iI2ZmZiIgb3BhY2l0eT0iLjkiLz48L3N2Zz4=">
+
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+
+    <!-- Custom Styles -->
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Main Application Container -->
+    <div class="app-wrapper">
+        <!-- Top Toolbar -->
+        <header class="app-header">
+            <div class="d-flex align-items-center gap-3">
+                <h1 class="h5 mb-0">
+                    <i class="bi bi-grid-3x3-gap-fill text-primary me-2"></i>
+                    Bootstrap Grid Playground x
+                </h1>
+                <span id="breakpointBadge" class="badge bg-primary">XS</span>
+            </div>
+            <div class="d-flex align-items-center gap-3">
+                <!-- Container Toggle -->
+                <div class="form-check form-switch">
+                    <input class="form-check-input" type="checkbox" id="containerToggle">
+                    <label class="form-check-label" for="containerToggle">
+                        <span id="containerLabel">.container</span>
+                    </label>
+                </div>
+                <!-- Ghost Grid Toggle -->
+                <div class="form-check form-switch">
+                    <input class="form-check-input" type="checkbox" id="ghostGridToggle" checked>
+                    <label class="form-check-label" for="ghostGridToggle">
+                        <i class="bi bi-grid"></i> Ghost Grid
+                    </label>
+                </div>
+                <!-- Info Icon with Tooltip -->
+                <div class="info-icon-wrapper">
+                    <i class="bi bi-info-circle text-secondary info-icon" id="infoIcon"></i>
+                    <div class="info-tooltip">
+                        <h6><i class="bi bi-lightbulb me-1"></i>How to Read the Grid</h6>
+                        <div class="tooltip-section">
+                            <span class="tooltip-badge ghost">Ghost Grid</span>
+                            <p>The <strong>pink dashed columns</strong> show the 12-column Bootstrap grid. Enable it to see how your columns align.</p>
+                        </div>
+                        <div class="tooltip-section">
+                            <span class="tooltip-badge columns">Colored Blocks</span>
+                            <p>Each <strong>colored block</strong> represents a column. Different colors help distinguish adjacent columns.</p>
+                        </div>
+                        <div class="tooltip-section">
+                            <span class="tooltip-badge dotted">Dotted Outlines</span>
+                            <p>The <strong>dotted outline</strong> around columns shows the actual space they occupy, including gutters.</p>
+                        </div>
+                        <div class="tooltip-section">
+                            <span class="tooltip-badge row-info">Row Container</span>
+                            <p>The <strong>dashed border</strong> around rows shows the row boundaries. Click to select and edit.</p>
+                        </div>
+                    </div>
+                </div>
+                <!-- Add Row Button -->
+                <button class="btn btn-success btn-sm" id="addRowBtn">
+                    <i class="bi bi-plus-lg"></i> Add Row
+                </button>
+                <!-- View Code Button -->
+                <button class="btn btn-outline-secondary btn-sm" id="viewCodeBtn">
+                    <i class="bi bi-code-slash"></i> View Code
+                </button>
+            </div>
+        </header>
+
+        <!-- Canvas Area -->
+        <main class="canvas-area">
+            <!-- Ghost Grid Overlay -->
+            <div id="ghostGrid" class="ghost-grid-overlay container active">
+                <div class="row h-100">
+                    <div class="col"><div class="ghost-col"></div></div>
+                    <div class="col"><div class="ghost-col"></div></div>
+                    <div class="col"><div class="ghost-col"></div></div>
+                    <div class="col"><div class="ghost-col"></div></div>
+                    <div class="col"><div class="ghost-col"></div></div>
+                    <div class="col"><div class="ghost-col"></div></div>
+                    <div class="col"><div class="ghost-col"></div></div>
+                    <div class="col"><div class="ghost-col"></div></div>
+                    <div class="col"><div class="ghost-col"></div></div>
+                    <div class="col"><div class="ghost-col"></div></div>
+                    <div class="col"><div class="ghost-col"></div></div>
+                    <div class="col"><div class="ghost-col"></div></div>
+                </div>
+            </div>
+
+            <!-- Playground Container -->
+            <div id="playground" class="container playground-container">
+                <!-- Rows will be rendered here -->
+            </div>
+        </main>
+
+        <!-- Editor Panel (Bottom Sheet) -->
+        <aside id="editorPanel" class="editor-panel">
+            <div class="editor-panel-header">
+                <div class="d-flex align-items-center gap-2">
+                    <i class="bi bi-pencil-square"></i>
+                    <span id="editorTitle">Select an element</span>
+                </div>
+                <button class="btn btn-sm btn-outline-secondary" id="closeEditorBtn">
+                    <i class="bi bi-x-lg"></i>
+                </button>
+            </div>
+            <div class="editor-panel-body" id="editorContent">
+                <p class="text-muted">Click on a row or column to edit its properties.</p>
+            </div>
+        </aside>
+
+        <!-- Code Modal -->
+        <div class="modal fade" id="codeModal" tabindex="-1">
+            <div class="modal-dialog modal-lg modal-dialog-scrollable">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">
+                            <i class="bi bi-code-slash me-2"></i>Generated HTML Code
+                        </h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <pre><code id="generatedCode" class="language-html"></code></pre>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-primary" id="copyCodeBtn">
+                            <i class="bi bi-clipboard"></i> Copy Code
+                        </button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS for Modal -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Application Script -->
+    <script src="script.js"></script>
+</body>
+</html>
+
