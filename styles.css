@@ -169,6 +169,13 @@ body {
     box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.15);
 }
 
+.playground-row.drag-over-row {
+    border-color: #198754;
+    border-style: solid;
+    background: rgba(25, 135, 84, 0.05);
+    box-shadow: 0 0 0 3px rgba(25, 135, 84, 0.15);
+}
+
 .row-controls {
     position: absolute;
     top: -14px;

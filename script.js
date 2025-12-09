@@ -885,9 +885,14 @@ function handleDragStart(e) {
 function handleDragEnd(e) {
     e.currentTarget.classList.remove('dragging');
 
-    // Remove all drag-over classes
+    // Remove all drag-over classes from columns
     document.querySelectorAll('.playground-col').forEach(col => {
         col.classList.remove('drag-over');
+    });
+
+    // Remove all drag-over classes from rows
+    document.querySelectorAll('.playground-row').forEach(row => {
+        row.classList.remove('drag-over-row');
     });
 
     draggedElement = null;
@@ -901,8 +906,18 @@ function handleDragOver(e) {
     e.dataTransfer.dropEffect = 'move';
 
     const targetCol = e.currentTarget;
+    const targetRowIndex = parseInt(targetCol.dataset.rowIndex);
+
     if (targetCol.classList.contains('playground-col') && !targetCol.classList.contains('dragging')) {
         targetCol.classList.add('drag-over');
+
+        // Add visual feedback to row if dragging between different rows
+        if (draggedElement && draggedElement.rowIndex !== targetRowIndex) {
+            const targetRow = targetCol.closest('.playground-row');
+            if (targetRow) {
+                targetRow.classList.add('drag-over-row');
+            }
+        }
     }
 
     return false;
@@ -910,6 +925,16 @@ function handleDragOver(e) {
 
 function handleDragLeave(e) {
     e.currentTarget.classList.remove('drag-over');
+
+    // Remove row-level visual feedback
+    const row = e.currentTarget.closest('.playground-row');
+    if (row) {
+        // Only remove if we're truly leaving the row, not just moving to another column in same row
+        const relatedTarget = e.relatedTarget;
+        if (!relatedTarget || !row.contains(relatedTarget)) {
+            row.classList.remove('drag-over-row');
+        }
+    }
 }
 
 function handleDrop(e) {
@@ -926,17 +951,18 @@ function handleDrop(e) {
     if (draggedElement &&
         (draggedElement.rowIndex !== targetRowIndex || draggedElement.colIndex !== targetColIndex)) {
 
-        // Only allow reordering within the same row
-        if (draggedElement.rowIndex === targetRowIndex) {
-            const row = state.rows[targetRowIndex];
-            const draggedCol = row.columns[draggedElement.colIndex];
+        const sourceRow = state.rows[draggedElement.rowIndex];
+        const targetRow = state.rows[targetRowIndex];
+        const draggedCol = sourceRow.columns[draggedElement.colIndex];
 
+        if (draggedElement.rowIndex === targetRowIndex) {
+            // Same row - reorder columns
             // Remove from old position
-            row.columns.splice(draggedElement.colIndex, 1);
+            sourceRow.columns.splice(draggedElement.colIndex, 1);
 
             // Insert at new position
             const newIndex = draggedElement.colIndex < targetColIndex ? targetColIndex - 1 : targetColIndex;
-            row.columns.splice(newIndex, 0, draggedCol);
+            sourceRow.columns.splice(newIndex, 0, draggedCol);
 
             // Update active element if needed
             if (state.activeElement?.type === 'col' && state.activeElement?.rowIndex === targetRowIndex) {
@@ -944,9 +970,31 @@ function handleDrop(e) {
                     state.activeElement.colIndex = newIndex;
                 }
             }
+        } else {
+            // Different row - move column to new row
+            // Check if target row has room (max 12 columns)
+            if (targetRow.columns.length >= 12) {
+                alert('Target row is full (12 columns maximum).');
+                e.currentTarget.classList.remove('drag-over');
+                return false;
+            }
 
-            renderGrid();
+            // Remove from source row
+            sourceRow.columns.splice(draggedElement.colIndex, 1);
+
+            // Insert at target position
+            targetRow.columns.splice(targetColIndex, 0, draggedCol);
+
+            // Clear active element if it was the dragged column
+            if (state.activeElement?.type === 'col' &&
+                state.activeElement?.rowIndex === draggedElement.rowIndex &&
+                state.activeElement?.colIndex === draggedElement.colIndex) {
+                state.activeElement = null;
+                closeEditorPanel();
+            }
         }
+
+        renderGrid();
     }
 
     e.currentTarget.classList.remove('drag-over');
