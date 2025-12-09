@@ -656,7 +656,7 @@ function renderColumnEditor(rowIndex, colIndex) {
         </div>
         
         <div class="editor-section">
-            <div class="editor-section-title">Column Height (for testing align-items)</div>
+            <div class="editor-section-title">Column Height (for testing align-items on the row settings)</div>
             <div class="inline-controls">
                 <div class="form-group">
                     <label for="colHeight">Height</label>

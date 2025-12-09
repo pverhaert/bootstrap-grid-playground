@@ -102,7 +102,10 @@ body {
 }
 
 .ghost-grid-overlay.container-fluid {
-    max-width: 100%;
+    max-width: none !important;
+    width: auto;
+    left: 1.5rem;
+    right: 1.5rem;
 }
 
 /* Let Bootstrap handle the row gutter - don't override */
@@ -464,7 +467,7 @@ body {
    Responsive Adjustments
    ============================================ */
 
-@media (max-width: 768px) {
+@media (max-width: 992px) {
     .app-header {
         flex-direction: column;
         gap: 0.75rem;
