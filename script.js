@@ -20,12 +20,12 @@ const createDefaultColumn = (colorIndex) => ({
     colorIndex: colorIndex !== undefined ? colorIndex : Math.floor(Math.random() * 8),
     height: '',           // Custom height (e.g., '50px', '100px', '150px', '200px')
     widths: {
-        xs: 'col',      // Default auto
-        sm: '',         // Empty = inherit from smaller
-        md: '',
-        lg: '',
-        xl: '',
-        xxl: ''
+        xs: '',         // Empty = no col class (allows removing column below XS breakpoint)
+        sm: '',         // Empty = inherit from XS
+        md: '',         // Empty = inherit from SM
+        lg: '',         // Empty = inherit from MD
+        xl: '',         // Empty = inherit from LG
+        xxl: ''         // Empty = inherit from XL
     },
     offsets: {
         xs: '',
@@ -263,10 +263,6 @@ function createColumnElement(col, rowIndex, colIndex) {
         }
     });
 
-    // If no width classes, add default 'col'
-    if (!colClasses.some(c => c.startsWith('col'))) {
-        colClasses.push('col');
-    }
 
     // Add offset classes
     Object.entries(col.offsets).forEach(([bp, value]) => {
@@ -323,9 +319,9 @@ function createColumnElement(col, rowIndex, colIndex) {
     }
 
     // Column label showing the effective classes
-    const visibleClasses = colClasses.filter(c => c !== 'playground-col' && c !== 'active');
+    const visibleClasses = colClasses.filter(c => c !== 'playground-col' && c !== 'active' && !c.startsWith('col-color-'));
     inner.innerHTML = `
-        <span class="col-label">${visibleClasses[0] || 'col'}</span>
+        <span class="col-label">${visibleClasses[0] || '(no col class)'}</span>
         <span class="col-classes">${visibleClasses.slice(1).join(' ') || ''}</span>
         <button class="col-delete" title="Delete column"><i class="bi bi-x"></i></button>
     `;
@@ -532,7 +528,26 @@ function renderColumnEditor(rowIndex, colIndex) {
     const container = document.getElementById('editorContent');
     document.getElementById('editorTitle').textContent = `Editing Column ${colIndex + 1} in Row ${rowIndex + 1}`;
 
-    // Generate width options
+    // Generate width options for XS (with "None" option)
+    const widthOptionsXS = `
+        <option value="">None</option>
+        <option value="col">Auto (equal)</option>
+        <option value="col-auto">Auto (content)</option>
+        <option value="col-1">1</option>
+        <option value="col-2">2</option>
+        <option value="col-3">3</option>
+        <option value="col-4">4</option>
+        <option value="col-5">5</option>
+        <option value="col-6">6</option>
+        <option value="col-7">7</option>
+        <option value="col-8">8</option>
+        <option value="col-9">9</option>
+        <option value="col-10">10</option>
+        <option value="col-11">11</option>
+        <option value="col-12">12</option>
+    `;
+
+    // Generate width options for other breakpoints (with "Inherit" option)
     const widthOptions = `
         <option value="">Inherit</option>
         <option value="col">Auto (equal)</option>
@@ -587,7 +602,7 @@ function renderColumnEditor(rowIndex, colIndex) {
             <div class="breakpoint-grid">
                 <div class="breakpoint-item">
                     <label>XS<br><small>&lt;576px</small></label>
-                    <select class="form-select form-select-sm" data-bp="xs" data-prop="widths">${widthOptions}</select>
+                    <select class="form-select form-select-sm" data-bp="xs" data-prop="widths">${widthOptionsXS}</select>
                 </div>
                 <div class="breakpoint-item">
                     <label>SM<br><small>≥576px</small></label>
@@ -753,10 +768,6 @@ function generateCode() {
                 }
             });
 
-            // Default col class if no widths specified
-            if (colClasses.length === 0) {
-                colClasses.push('col');
-            }
 
             // Offsets
             Object.entries(col.offsets).forEach(([bp, value]) => {
@@ -785,7 +796,9 @@ function generateCode() {
                 colClasses.push(`order-${col.order}`);
             }
 
-            code += `${indent}${indent}<div class="${colClasses.join(' ')}">...</div>\n`;
+            // Generate the column div with or without class attribute
+            const classAttr = colClasses.length > 0 ? ` class="${colClasses.join(' ')}"` : '';
+            code += `${indent}${indent}<div${classAttr}>...</div>\n`;
         });
 
         code += `${indent}</div>\n`;
